@@ -6,6 +6,7 @@ fn release_workflow() -> String {
         env!("CARGO_MANIFEST_DIR")
     ))
     .unwrap()
+    .replace("\r\n", "\n")
 }
 
 fn job_block<'a>(workflow: &'a str, job_name: &str) -> &'a str {
