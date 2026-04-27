@@ -166,6 +166,46 @@ jobs:
       - name: Check file size limit
         run: rust-script scripts/check-file-size.rs
 
+  # === ONTOLOGY COVERAGE CHECK ===
+  # Verify that every human-language word in the curated paths is either
+  # defined as a concept in the meta-ontology or listed in
+  # data/allowlist*.lino. The check uses ::error:: + exit 1 so the PR is
+  # blocked on a missing word — see docs/case-studies/issue-1/ and
+  # docs/plan/07-ci-coverage-check.md.
+  ontology-coverage:
+    name: Ontology Word Coverage
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      always() && !cancelled() && (
+        github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch' ||
+        needs.detect-changes.outputs.rs-changed == 'true' ||
+        needs.detect-changes.outputs.docs-changed == 'true'
+      )
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-coverage-check-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-coverage-check-
+
+      - name: Build CLI
+        run: cargo build --bin meta-ontology
+
+      - name: Check word coverage of README.md
+        run: cargo run --bin meta-ontology -- check-words README.md
+
   # === TEST ===
   # Test runs independently of changelog check
   test:
