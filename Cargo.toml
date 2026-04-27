@@ -1,30 +1,41 @@
 [package]
-name = "example-sum-package-name"
+name = "meta-ontology"
 version = "0.7.0"
 edition = "2021"
-description = "A Rust package template for AI-driven development"
+description = "A self-describing meta-ontology stored in Links Notation: library, CLI, microservice, and WASM/React web app (public domain)."
 readme = "README.md"
 license = "Unlicense"
-keywords = ["template", "rust", "ai-driven"]
-categories = ["development-tools"]
-repository = "https://github.com/link-foundation/rust-ai-driven-development-pipeline-template"
-documentation = "https://github.com/link-foundation/rust-ai-driven-development-pipeline-template"
+keywords = ["ontology", "lino", "links-notation", "meta-ontology", "nsm"]
+categories = ["data-structures", "command-line-utilities", "science"]
+repository = "https://github.com/link-foundation/meta-ontology"
+documentation = "https://github.com/link-foundation/meta-ontology"
 rust-version = "1.70"
 
 [lib]
-name = "example_sum_package_name"
+name = "meta_ontology"
 path = "src/lib.rs"
 
 [[bin]]
-name = "example-sum-package-name"
+name = "meta-ontology"
 path = "src/main.rs"
 
 [dependencies]
+links-notation = "0.13"
 lino-arguments = "0.3"
 clap = { version = "4.4", features = ["derive", "env"] }
+walkdir = "2.5"
+thiserror = "2"
 
 [dev-dependencies]
 regex = "1"
+tempfile = "3"
+
+[features]
+default = []
+# Optional encoding/decoding via lino-objects-codec. The crate isn't yet on
+# crates.io so it stays a feature flag; enable when shipping the microservice
+# (M3) or web app (M4).
+codec = []
 
 [lints.rust]
 unsafe_code = "forbid"
