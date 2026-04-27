@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["Concept","Definition","Mapping","Ontology"]};
