@@ -1,6 +1,6 @@
 [package]
 name = "meta-ontology"
-version = "0.1.0"
+version = "0.7.0"
 edition = "2021"
 description = "A self-describing meta-ontology stored in Links Notation: library, CLI, microservice, and WASM/React web app (public domain)."
 readme = "README.md"
