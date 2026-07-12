@@ -1,0 +1,35 @@
+{
+  "observed_at": "2026-07-12",
+  "meta_ontology": {
+    "repository": "link-foundation/meta-ontology",
+    "default_branch": "main",
+    "default_branch_commit": "04e732e",
+    "prepared_branch": "issue-5-e2602184e2c5",
+    "pull_request": 6,
+    "pull_request_state_at_collection": "OPEN_DRAFT",
+    "issue_comments": 0,
+    "pull_request_conversation_comments": 0,
+    "pull_request_inline_comments": 0,
+    "pull_request_reviews": 0
+  },
+  "openmetadata": {
+    "repository": "open-metadata/OpenMetadata",
+    "default_branch": "main",
+    "license_spdx": "Apache-2.0",
+    "latest_github_release": "1.13.1-release",
+    "latest_release_published_at": "2026-06-27T11:35:50Z",
+    "relevant_top_level_areas": [
+      "openmetadata-spec",
+      "openmetadata-service",
+      "ingestion",
+      "openmetadata-ui",
+      "openmetadata-clients",
+      "openmetadata-dist",
+      "docker"
+    ]
+  },
+  "notes": [
+    "Counts and latest-release facts are time-sensitive and must be rechecked before implementation.",
+    "No upstream source files are copied into this repository; primary links and derived observations are preserved instead."
+  ]
+}

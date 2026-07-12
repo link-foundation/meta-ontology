@@ -1,0 +1,17 @@
+{
+  "observed_at": "2026-07-12",
+  "url": "https://github.com/link-foundation/meta-ontology/issues/5",
+  "number": 5,
+  "state": "OPEN",
+  "title": "We should use best practices from https://github.com/open-metadata/OpenMetadata",
+  "labels": ["documentation", "enhancement"],
+  "comment_count": 0,
+  "requirements_from_body": [
+    "Collect issue-related data under docs/case-studies/issue-{id}.",
+    "Perform deep case study analysis and search online for additional facts and data.",
+    "List every requirement from the issue.",
+    "Propose solutions and solution plans for every requirement.",
+    "Check existing components and libraries that solve similar problems or can help.",
+    "Plan and execute the complete deliverable in one pull request."
+  ]
+}
