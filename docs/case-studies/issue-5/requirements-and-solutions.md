@@ -78,12 +78,19 @@ and stop/go gates.
 
 ### R6: components and libraries
 
-**Decision:** prefer standards and focused Rust crates over an OpenMetadata
-runtime dependency. OpenMetadata can interoperate later via JSON/RDF/OpenLineage
-or a purpose-built connector.
+**Decision:** prefer the Link Foundation toolchain first, then standards and
+focused Rust crates, over an OpenMetadata runtime dependency. Per maintainer
+direction ([PR 6 comment](https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-4951163416)),
+the model, graph, and interchange layers should be built on `meta-language`
+now that its enabling issue
+([`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179))
+is closed. OpenMetadata can interoperate later via JSON/RDF/OpenLineage or a
+purpose-built connector.
 
 | Capability | Build/adopt decision | Candidate |
 | --- | --- | --- |
+| Canonical model + typed graph | Adopt as foundation | `meta-language` (links-network model, Rust/JS parity) |
+| Multi-format interchange | Adopt for Phase 4 | `meta-language` format support (`meta-language#179`, now ready) |
 | Typed serialization | Adopt | `serde` |
 | JSON Schema generation | Prototype and compare generated diff in CI | `schemars` |
 | JSON Schema validation | Adopt at interchange boundary | `jsonschema` |
@@ -99,7 +106,9 @@ or a purpose-built connector.
 
 Crates must be re-evaluated for maintenance, license, MSRV, WASM compatibility,
 and dependency footprint when their slice begins. Listing one is not approval to
-add it.
+add it. Where `meta-language` already covers a capability (canonical model,
+links-network graph, or multi-format interchange), prefer it and treat the
+generic crate as a fallback only if a concrete gap is proven.
 
 ### R8: control complexity
 
@@ -126,6 +135,18 @@ all of OpenMetadata's capabilities would violate R8 and the issue asks for
 solution proposals/plans, not a platform rewrite.
 
 ## Prioritized implementation roadmap
+
+### Implementation vehicle
+
+Every product phase below is expected to be built on the Link Foundation
+`meta-language` library rather than on a from-scratch stack, per the maintainer's
+direction on PR 6. `meta-language` provides the links-network model with
+guaranteed Rust/JS parity, so the same foundation serves the CLI, the M3
+microservice, and the M4 WASM/React app. Its enabling prerequisite,
+[`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179)
+(multi-format translation/transformation/storage), was closed as completed on
+2026-07-13, so Phase 4 interchange is now unblocked. The generic crates named
+above remain fallbacks for capabilities `meta-language` does not yet cover.
 
 ### Phase 0: accept this architecture record
 
@@ -250,7 +271,8 @@ data and history; operational objectives are explicit.
 
 ## Final recommendation
 
-Approve Phases 1 and 2 as the first product follow-up. They create the stable
-identity, validation, and evidence foundation required by every later practice.
-Do not begin with connectors, HTTP, search, or deployment infrastructure: doing
-so would freeze weak contracts behind expensive boundaries.
+Approve Phases 1 and 2 as the first product follow-up, building them on the
+`meta-language` library. They create the stable identity, validation, and
+evidence foundation required by every later practice. Do not begin with
+connectors, HTTP, search, or deployment infrastructure: doing so would freeze
+weak contracts behind expensive boundaries.

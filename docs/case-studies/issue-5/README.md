@@ -58,6 +58,20 @@ reviews existed when collected.
 8. **Governance primitives.** Ownership, lifecycle state, classifications, and
    policy references should be ordinary metadata, not UI-only annotations.
 
+### Implementation vehicle
+
+Per the maintainer's direction on
+[PR 6](https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-4951163416),
+the product phases should be built on the Link Foundation
+[`meta-language`](https://github.com/link-foundation/meta-language) library
+(links-network model with Rust/JS parity) rather than a from-scratch stack. Its
+enabling prerequisite,
+[`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179)
+(multi-format translation/transformation/storage), was closed as completed on
+2026-07-13, so the interchange work is now unblocked. See
+[`openmetadata-analysis.md`](openmetadata-analysis.md#implementation-vehicle-the-meta-language-library)
+for how each practice maps onto that library.
+
 ### Practices to defer
 
 - A separate database and search index until the corpus or query latency needs it.

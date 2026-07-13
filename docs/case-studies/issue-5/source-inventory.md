@@ -44,6 +44,28 @@ Relevant upstream areas:
 - [Contribution guide](https://docs.open-metadata.org/v1.12.x/developers/contribute):
   issue-based contribution and local build/test workflow.
 
+## Link Foundation implementation toolchain
+
+The maintainer's direction ([PR 6 comment, 2026-07-13](https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-4951163416))
+is that the full implementation should be built on the Link Foundation
+`meta-language` library rather than on a bespoke stack. That comment names
+[`link-foundation/meta-language#179`](https://github.com/link-foundation/meta-language/issues/179)
+as the enabling prerequisite; it was closed as completed on 2026-07-13, so the
+prerequisite is now satisfied. This section records that ecosystem so the plan
+below can prefer it over generic crates.
+
+| Component | Observation | Relevance to the plan |
+| --- | --- | --- |
+| [`meta-language`](https://github.com/link-foundation/meta-language) | Universal, self-describing meta language backed by a links network; reference Rust crate plus a parity JavaScript package (`crates.io` / `npm`); Unlicense | Primary candidate foundation for the canonical model, typed graph, and interchange; its Rust/JS parity also serves the M3 microservice and the M4 WASM/React app |
+| [`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179) | "Support all file formats … required at meta-ontology#6"; closed/completed 2026-07-13 | Unblocks format translation/transformation/storage, which is the interchange requirement (Phase 4) |
+| [`links-notation`](https://github.com/link-foundation/links-notation) | lino parser/serializer already used for every `data/*.lino` file | Remains the canonical storage syntax; the semantic model layers on top |
+| [`lino-arguments`](https://github.com/link-foundation/lino-arguments) | clap-style CLI argument parser with `.lenv` config | Already the CLI boundary; reused unchanged |
+| [`lino-objects-codec`](https://github.com/link-foundation/meta-ontology/blob/main/Cargo.toml) | Feature-gated runtime object codec (`codec`) staged for M3/M4 | Object encoding at the service and web-app boundaries |
+
+The repository README already states this project "follows the issue's directive
+to use the `link-foundation` toolchain," so preferring `meta-language` is
+consistent with existing direction, not a new dependency policy.
+
 ## Primary technical documentation
 
 | Topic | Source | Evidence used |
@@ -68,6 +90,8 @@ These are evaluated as interoperability options, not mandatory dependencies.
 
 | Need | Candidate | Intended use |
 | --- | --- | --- |
+| Canonical model + typed graph | [`meta-language`](https://github.com/link-foundation/meta-language) | Preferred foundation per maintainer direction; links-network model with Rust/JS parity for CLI, service, and WASM |
+| Multi-format translation/storage | [`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179) | Enables format translation/transformation/storage for interchange (Phase 4); now ready |
 | Data contract validation | [JSON Schema 2020-12](https://json-schema.org/draft/2020-12) | Portable interchange schema; keep lino canonical if desired |
 | Semantic graph exchange | [RDF 1.2](https://www.w3.org/TR/rdf12-concepts/) / [OWL 2](https://www.w3.org/TR/owl2-overview/) | Import/export and ontology-tool interoperability |
 | Graph constraints | [SHACL](https://www.w3.org/TR/shacl12-core/) | Express portable graph validity rules |

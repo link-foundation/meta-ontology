@@ -224,6 +224,36 @@ None of this requires adopting OpenMetadata's deployment topology today.
 | Search stack adds operations burden | Benchmark linear search; use embedded indexing before external services |
 | Upstream practices change | Pin source/version/date and re-evaluate at implementation time |
 
+## Implementation vehicle: the meta-language library
+
+OpenMetadata builds its own canonical schema, model generation, and typed graph.
+Meta-ontology does not need to reproduce that machinery, because the Link
+Foundation ecosystem already provides it. The maintainer's direction on PR 6 is
+to implement the practices above on the
+[`meta-language`](https://github.com/link-foundation/meta-language) library once
+its enabling prerequisite is ready; that prerequisite,
+[`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179)
+(multi-format translation/transformation/storage), was closed as completed on
+2026-07-13.
+
+This changes *how*, not *what*: the invariants and boundaries in sections 1–10
+still hold, but they should be realized as follows.
+
+- **Canonical model and typed graph (sections 1–3).** Use `meta-language`'s
+  links-network model as the semantic authority instead of hand-rolling
+  `serde`/`schemars`/`petgraph` layers. `links-notation` remains the storage
+  syntax; `meta-language` supplies the graph the storage is parsed into.
+- **Interchange (section 1 and the JSON boundary).** Route format
+  translation/transformation/storage through `meta-language#179` rather than a
+  bespoke converter set, so meta-ontology gains every format the library
+  supports.
+- **Rust/JS parity for M3 and M4.** `meta-language` ships a Rust crate and a
+  parity JavaScript package, so the same model underpins the CLI, the
+  microservice, and the WASM/React web app instead of three divergent shapes.
+
+The generic crates in the component tables stay as fallbacks for any capability
+`meta-language` does not yet cover, evaluated only when a concrete gap is proven.
+
 ## Recommended outcome
 
 The durable OpenMetadata lesson is contract coherence: schemas, ingestion,

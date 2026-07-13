@@ -28,8 +28,25 @@
       "docker"
     ]
   },
+  "link_foundation_toolchain": {
+    "observed_at": "2026-07-13",
+    "meta_language_repository": "link-foundation/meta-language",
+    "meta_language_summary": "Universal self-describing meta language backed by a links network; Rust crate plus parity JavaScript package; Unlicense",
+    "meta_language_issue_179": {
+      "url": "https://github.com/link-foundation/meta-language/issues/179",
+      "title": "Support all file formats required at meta-ontology#6",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-07-13T00:20:45Z"
+    },
+    "maintainer_direction": {
+      "source": "https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-4951163416",
+      "summary": "Full implementation should use the meta-language library once meta-language#179 is ready; that prerequisite is now closed/completed."
+    }
+  },
   "notes": [
     "Counts and latest-release facts are time-sensitive and must be rechecked before implementation.",
-    "No upstream source files are copied into this repository; primary links and derived observations are preserved instead."
+    "No upstream source files are copied into this repository; primary links and derived observations are preserved instead.",
+    "2026-07-13: maintainer directed that the implementation be built on the meta-language library; its enabling issue meta-language#179 was closed as completed the same day."
   ]
 }
