@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["RetryClass"],"fn":["run_connector"],"struct":["Checkpoint","ConnectorCapabilities","ConnectorConfig","FixtureConnector","IngestionError","IngestionReport","RawRecord","SourceBatch"],"trait":["SourceConnector"]};

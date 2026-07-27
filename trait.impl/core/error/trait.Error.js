@@ -1,9 +1,9 @@
 (function() {
-    const implementors = Object.fromEntries([["meta_ontology",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.95.0/core/error/trait.Error.html\" title=\"trait core::error::Error\">Error</a> for <a class=\"enum\" href=\"meta_ontology/loader/enum.LoadError.html\" title=\"enum meta_ontology::loader::LoadError\">LoadError</a>",0]]]]);
+    const implementors = Object.fromEntries([["meta_ontology",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/error/trait.Error.html\" title=\"trait core::error::Error\">Error</a> for <a class=\"enum\" href=\"meta_ontology/catalog/enum.CatalogError.html\" title=\"enum meta_ontology::catalog::CatalogError\">CatalogError</a>",0],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/error/trait.Error.html\" title=\"trait core::error::Error\">Error</a> for <a class=\"enum\" href=\"meta_ontology/loader/enum.LoadError.html\" title=\"enum meta_ontology::loader::LoadError\">LoadError</a>",0],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/error/trait.Error.html\" title=\"trait core::error::Error\">Error</a> for <a class=\"struct\" href=\"meta_ontology/ingestion/struct.IngestionError.html\" title=\"struct meta_ontology::ingestion::IngestionError\">IngestionError</a>",0]]]]);
     if (window.register_implementors) {
         window.register_implementors(implementors);
     } else {
         window.pending_implementors = implementors;
     }
 })()
-//{"start":59,"fragment_lengths":[298]}
+//{"start":59,"fragment_lengths":[894]}

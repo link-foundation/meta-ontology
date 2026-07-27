@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["loader","ontology","words"]};
+window.SIDEBAR_ITEMS = {"mod":["catalog","ingestion","loader","ontology","words"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["CURRENT_SCHEMA_VERSION"],"enum":["CatalogError","ChangeKind","DiagnosticCode","ImportObjectKind","LifecycleState","ReviewState","Severity"],"struct":["ConceptId","Diagnostic","Governance","ImportChange","ImportPlan","InterchangeDocument","Provenance","Relationship","SearchMatch","ValidationReport"]};
