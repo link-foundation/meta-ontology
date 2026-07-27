@@ -11,13 +11,15 @@ schema, stable entity identity, explicit relationships, versioned changes,
 connector isolation, API-first access, governance metadata, and automated
 quality checks.
 
-The recommended sequence is deliberately incremental. Strengthen the current
-in-process Rust model and lino data first; add interchange and ingestion
-contracts next; add persistence, search, HTTP, and a UI only when their roadmap
-milestones and measured usage justify the operational cost.
+The implementation follows that incremental sequence in this PR. It strengthens
+the in-process Rust model and lino data, adds interchange and ingestion
+contracts, and provides a measured linear-search baseline. Persistence, HTTP,
+distributed search, authorization enforcement, and UI work remain behind the
+documented decision gates.
 
-Research was performed on 2026-07-12. OpenMetadata is fast-moving, so facts
-that can change are pinned to the observation date and links to primary sources.
+Research was performed on 2026-07-12 and refreshed for implementation on
+2026-07-27. OpenMetadata is fast-moving, so facts that can change are pinned to
+the observation date and links to primary sources.
 
 ## Collected Data
 
@@ -32,43 +34,42 @@ that can change are pinned to the observation date and links to primary sources.
   preserves time-sensitive repository and PR observations in a compact,
   reviewable form.
 
-No issue comments, PR conversation comments, inline review comments, or PR
-reviews existed when collected.
+No issue comments, inline review comments, or PR reviews existed when refreshed.
+The PR conversation and the implementation request are recorded in the source
+inventory and compact observations.
 
-## Findings
+## Delivered implementation
 
-### Practices to adopt now
+The case study now has an executable counterpart:
 
-1. **Schema-first domain model.** Validate every persisted concept, definition,
-   mapping, language exponent, and relationship against a versioned contract.
-2. **Stable identity separate from display names.** Renames must not break
-   mappings, definitions, lineage, or future external references.
-3. **Typed graph edges.** Replace implicit string conventions with a small,
-   documented relation vocabulary and validate edge endpoints.
-4. **Provenance and change history.** Record source, author/agent, timestamp,
-   schema version, and change reason. Emit a deterministic change record when
-   loading or updating data.
-5. **Layered validation.** Separate parse validity, schema validity, graph
-   integrity, semantic quality, and repository word coverage so failures are
-   actionable.
-6. **Connector boundary.** Future importers should produce the same normalized
-   intermediate model; source-specific code must not leak into the core graph.
-7. **Contract-driven interfaces.** The library remains authoritative. CLI,
-   future HTTP, WASM, and importers consume the same service contracts.
-8. **Governance primitives.** Ownership, lifecycle state, classifications, and
-   policy references should be ordinary metadata, not UI-only annotations.
+- `catalog.rs` implements schema versioning, immutable IDs, typed relationships,
+  provenance, governance, stable diagnostics, JSON interchange, deterministic
+  change plans, and linear search.
+- The ontology is backed by a verified `meta-language::LinkNetwork`; callers can
+  obtain an immutable versioned `NetworkSnapshot`.
+- `ingestion.rs` implements a source-neutral connector contract and a complete
+  fixture connector with typed configuration, credential redaction,
+  capabilities, checkpoints, quarantineable errors, normalization, dry run,
+  resume, and idempotent replay.
+- `validate`, `export-json`, `json-schema`, `plan-import`, and `search` expose
+  the contracts through the existing CLI.
+- The seed data declares its schema version, governance metadata, and explicit
+  relationships in Links Notation.
+- Focused unit and CLI integration tests reproduce invalid contracts and verify
+  the successful end-to-end paths.
 
 ### Implementation vehicle
 
 Per the maintainer's direction on
 [PR 6](https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-4951163416),
-the product phases should be built on the Link Foundation
+the product implementation is built on the Link Foundation
 [`meta-language`](https://github.com/link-foundation/meta-language) library
 (links-network model with Rust/JS parity) rather than a from-scratch stack. Its
 enabling prerequisite,
 [`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179)
 (multi-format translation/transformation/storage), was closed as completed on
-2026-07-13, so the interchange work is now unblocked. See
+2026-07-13. The delivered catalog uses its links-network, verification, term
+lookup, and snapshot APIs. See
 [`openmetadata-analysis.md`](openmetadata-analysis.md#implementation-vehicle-the-meta-language-library)
 for how each practice maps onto that library.
 
@@ -108,20 +109,20 @@ each importer produces one normalized representation.
 
 | OpenMetadata practice | Fit | Decision |
 | --- | --- | --- |
-| Canonical schema and generated/typed models | High | Adopt incrementally |
-| Stable IDs, names, ownership, tags, versions | High | Add to domain model |
-| Typed relationships and lineage | High | Add a relation vocabulary |
-| Source-to-sink connector topology | High | Adapt as a small Rust trait pipeline |
+| Canonical schema and generated/typed models | High | Implemented |
+| Stable IDs, names, ownership, tags, versions | High | Implemented |
+| Typed relationships and lineage | High | Implemented baseline |
+| Source-to-sink connector topology | High | Implemented fixture pipeline |
 | REST resources and JSON Patch | Medium | Design contracts now; implement at M3 |
-| Change events and webhooks | Medium | Start with deterministic local events |
-| Data quality tests and observability | Medium | Adapt to ontology integrity rules |
-| Search index | Low today | Keep an interface; defer infrastructure |
+| Change events and webhooks | Medium | Deterministic local plans implemented; webhooks deferred |
+| Data quality tests and observability | Medium | Layered integrity diagnostics implemented |
+| Search index | Low today | Linear baseline implemented; infrastructure deferred |
 | Airflow-style workflow scheduling | Low today | Defer |
 | Full production deployment stack | Low today | Do not copy |
 
 ## Completion Criteria
 
-This case study satisfies issue 5 when it:
+This case study and implementation satisfy issue 5 by:
 
 - preserves issue- and PR-related observations under this directory;
 - uses current primary online sources and distinguishes observations from
@@ -130,7 +131,6 @@ This case study satisfies issue 5 when it:
 - evaluates OpenMetadata practices against this repository rather than merely
   summarizing OpenMetadata;
 - identifies reusable standards, crates, and libraries;
-- supplies a prioritized, testable implementation plan for every requirement.
-
-The analysis and plan meet those criteria. Product changes are intentionally
-proposed as future slices rather than bundled into this research PR.
+- supplying a prioritized, testable implementation plan for every requirement;
+- implementing the in-process phases selected by the decision gates;
+- keeping only service- and scale-dependent work as explicit future slices.

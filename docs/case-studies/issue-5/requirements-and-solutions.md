@@ -19,7 +19,7 @@ by “use best practices” and by making the output reviewable and actionable.
 | R7 | Identify OpenMetadata practices suitable for meta-ontology | Issue title | Ten practice areas with fit decisions |
 | R8 | Avoid adopting unsuitable complexity | “best practices” requires contextual judgment | Explicit deferrals and decision gates |
 | R9 | Make recommendations verifiable | Deep analysis requirement | Acceptance tests, provenance, pinned sources |
-| R10 | Complete planning and execution in one PR | Issue body | All research artifacts are in PR 6 |
+| R10 | Complete planning and execution in one PR | Issue body | Research plus the in-process catalog, connector, interchange, CLI, and tests are in PR 6 |
 
 ## Solutions by requirement
 
@@ -81,19 +81,19 @@ and stop/go gates.
 **Decision:** prefer the Link Foundation toolchain first, then standards and
 focused Rust crates, over an OpenMetadata runtime dependency. Per maintainer
 direction ([PR 6 comment](https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-4951163416)),
-the model, graph, and interchange layers should be built on `meta-language`
-now that its enabling issue
+the delivered model, graph, and interchange layers are built on
+`meta-language`, now that its enabling issue
 ([`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179))
 is closed. OpenMetadata can interoperate later via JSON/RDF/OpenLineage or a
 purpose-built connector.
 
 | Capability | Build/adopt decision | Candidate |
 | --- | --- | --- |
-| Canonical model + typed graph | Adopt as foundation | `meta-language` (links-network model, Rust/JS parity) |
-| Multi-format interchange | Adopt for Phase 4 | `meta-language` format support (`meta-language#179`, now ready) |
-| Typed serialization | Adopt | `serde` |
-| JSON Schema generation | Prototype and compare generated diff in CI | `schemars` |
-| JSON Schema validation | Adopt at interchange boundary | `jsonschema` |
+| Canonical model + typed graph | Adopted as foundation | `meta-language` 0.54 (links-network model and snapshots) |
+| Multi-format interchange | LiNo semantic network plus JSON contract delivered; expand only with loss tests | `meta-language` format support (`meta-language#179`) |
+| Typed serialization | Adopted | `serde` |
+| JSON Schema generation | Adopted at the public contract boundary | `schemars` |
+| JSON Schema validation | Adopted at import boundary | `jsonschema` |
 | Stable opaque IDs | Start with explicit IDs; use crate if UUIDs chosen | `uuid` |
 | Graph algorithms | Keep current code until complexity warrants dependency | `petgraph` |
 | RDF/OWL exchange | Design mapping first; evaluate maintained Rust libraries with fixtures | W3C RDF/OWL |
@@ -101,7 +101,7 @@ purpose-built connector.
 | Constraint exchange | Export selected rules later | SHACL |
 | HTTP API | Use existing roadmap selection | `axum` |
 | OpenAPI | Generate from endpoint/model types | `utoipa` |
-| Search | Linear baseline, then benchmark embedded option | `tantivy` |
+| Search | Linear baseline delivered; benchmark before adding an index | `tantivy` |
 | Pipeline lineage | Interoperate only when pipeline entities exist | OpenLineage |
 
 Crates must be re-evaluated for maintenance, license, MSRV, WASM compatibility,
@@ -129,26 +129,31 @@ codes. Benchmarks, not analogy, trigger infrastructure.
 
 ### R10: single-PR execution
 
-**Decision:** PR 6 contains the complete research deliverable and future plans.
-The product slices remain separately reviewable future work because implementing
-all of OpenMetadata's capabilities would violate R8 and the issue asks for
-solution proposals/plans, not a platform rewrite.
+**Decision:** PR 6 contains the complete research deliverable and implements the
+in-process slices that do not violate R8: the canonical contract, stable
+identity, typed relationships, provenance/governance, layered validation,
+deterministic change planning, a fixture connector, JSON interchange, CLI
+surfaces, and linear search. Database, HTTP, authorization enforcement,
+distributed indexing, scheduling, and UI slices remain gated because they need
+requirements that this repository does not yet have.
 
-## Prioritized implementation roadmap
+## Implementation status and remaining roadmap
 
 ### Implementation vehicle
 
-Every product phase below is expected to be built on the Link Foundation
+Every delivered product phase below is built on the Link Foundation
 `meta-language` library rather than on a from-scratch stack, per the maintainer's
 direction on PR 6. `meta-language` provides the links-network model with
 guaranteed Rust/JS parity, so the same foundation serves the CLI, the M3
 microservice, and the M4 WASM/React app. Its enabling prerequisite,
 [`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179)
 (multi-format translation/transformation/storage), was closed as completed on
-2026-07-13, so Phase 4 interchange is now unblocked. The generic crates named
-above remain fallbacks for capabilities `meta-language` does not yet cover.
+2026-07-13. The implementation uses the crate's links-network parsing,
+full-match verification, term lookup, and versioned snapshots. The generic
+crates named above are used only for the typed JSON boundary that
+`meta-language` does not replace.
 
-### Phase 0: accept this architecture record
+### Phase 0: architecture record — delivered
 
 Deliverables:
 
@@ -159,12 +164,12 @@ Deliverables:
 Acceptance: documentation links pass; local CI passes; reviewers can trace each
 requirement to a delivered artifact.
 
-### Phase 1: versioned identity and validation
+### Phase 1: versioned identity and validation — delivered baseline
 
 Dependencies: none.
 
-1. Add failing fixtures for duplicate IDs, dangling edges, invalid relation
-   domain/range, ambiguous aliases, and unsupported schema versions.
+1. Add failing fixtures for duplicate IDs, dangling edges, ambiguous aliases,
+   unsupported relation kinds, and unsupported schema versions.
 2. Introduce `ConceptId`, dataset `schema_version`, lifecycle state, and source
    location without changing CLI display behavior.
 3. Add layered validators and stable diagnostic codes.
@@ -175,10 +180,13 @@ Acceptance:
 
 - all current data migrates without semantic loss;
 - invalid fixtures fail at the intended validation layer;
-- a rename preserves ID-based references;
+- IDs and edge endpoints are independent from display labels and canonical names;
 - CLI output remains backward compatible unless explicitly versioned.
 
-### Phase 2: provenance and deterministic changes
+Advanced relation domain/range, cardinality, inverse, and transitivity rules
+remain an additive semantic-validation slice once category policy is specified.
+
+### Phase 2: provenance and deterministic changes — delivered
 
 Dependencies: Phase 1.
 
@@ -191,7 +199,7 @@ Dependencies: Phase 1.
 Acceptance: importing the same fixture twice produces zero updates on the
 second run; every changed assertion points to source evidence.
 
-### Phase 3: one connector contract
+### Phase 3: one connector contract — delivered
 
 Dependencies: Phases 1-2.
 
@@ -206,20 +214,21 @@ Acceptance: two unchanged runs are idempotent; invalid records are quarantined
 with evidence; no source-specific field enters the core model without a general
 domain reason.
 
-### Phase 4: interchange
+### Phase 4: interchange — JSON baseline delivered
 
 Dependencies: Phase 1; provenance fields from Phase 2 recommended.
 
-1. Generate or maintain JSON Schema for the stable public model.
-2. Add JSON import/export round-trip fixtures.
+1. Generate JSON Schema from the stable public model. **Delivered.**
+2. Validate JSON imports and test export/import round trips. **Delivered.**
 3. Map a deliberately small RDF/OWL/PROV-O subset and publish loss reports.
+   **Deferred until the supported semantic subset is approved.**
 4. Evaluate SHACL export for constraints; do not claim lossless round trips
-   until tests prove them.
+   until tests prove them. **Deferred with the same gate.**
 
 Acceptance: schema validation runs in CI; JSON round trips preserve IDs and
 relationships; semantic exports declare unsupported/lossy fields.
 
-### Phase 5: service API (existing roadmap M3)
+### Phase 5: service API (existing roadmap M3) — deferred by R8
 
 Dependencies: stable Phases 1-4 contracts.
 
@@ -232,7 +241,7 @@ Dependencies: stable Phases 1-4 contracts.
 Acceptance: generated client contract tests pass; malformed/expensive requests
 are bounded; library, CLI, and API return semantically consistent entities.
 
-### Phase 6: search and UI (existing roadmap M4)
+### Phase 6: search and UI (existing roadmap M4) — linear search delivered, UI deferred
 
 Dependencies: representative corpus and measured UX needs.
 
@@ -245,7 +254,7 @@ Dependencies: representative corpus and measured UX needs.
 Acceptance: a recorded benchmark justifies any new index; search relevance has
 golden queries; the UI has browser tests and accessibility checks.
 
-### Phase 7: governance enforcement and operations
+### Phase 7: governance enforcement and operations — metadata delivered, enforcement deferred
 
 Dependencies: mutating service and real multi-user requirements.
 

@@ -237,27 +237,33 @@ its enabling prerequisite is ready; that prerequisite,
 2026-07-13.
 
 This changes *how*, not *what*: the invariants and boundaries in sections 1–10
-still hold, but they should be realized as follows.
+still hold. The in-process implementation in this PR realizes them as follows.
 
-- **Canonical model and typed graph (sections 1–3).** Use `meta-language`'s
-  links-network model as the semantic authority instead of hand-rolling
-  `serde`/`schemars`/`petgraph` layers. `links-notation` remains the storage
-  syntax; `meta-language` supplies the graph the storage is parsed into.
+- **Canonical model and typed graph (sections 1–3).** The loader normalizes
+  Links Notation into one Rust contract and then constructs a verified
+  `meta-language::LinkNetwork`. Stable IDs and explicit relationships remain
+  available through the typed catalog model, while the network supplies shared
+  graph semantics, term lookup, full-match verification, and snapshots.
 - **Interchange (section 1 and the JSON boundary).** Route format
-  translation/transformation/storage through `meta-language#179` rather than a
-  bespoke converter set, so meta-ontology gains every format the library
-  supports.
+  semantics through the same network. The delivered JSON boundary is generated
+  from and validated against the typed catalog contract because it carries
+  catalog-specific governance and provenance fields. Additional
+  `meta-language` formats require explicit supported-field and loss tests; this
+  PR does not claim an unproved lossless conversion.
 - **Rust/JS parity for M3 and M4.** `meta-language` ships a Rust crate and a
   parity JavaScript package, so the same model underpins the CLI, the
   microservice, and the WASM/React web app instead of three divergent shapes.
 
-The generic crates in the component tables stay as fallbacks for any capability
-`meta-language` does not yet cover, evaluated only when a concrete gap is proven.
+`serde`, `schemars`, and `jsonschema` cover the concrete typed-JSON gap.
+`petgraph`, an external search service, and OpenMetadata runtime components were
+not added.
 
 ## Recommended outcome
 
 The durable OpenMetadata lesson is contract coherence: schemas, ingestion,
 service APIs, governance, versioning, quality, and clients describe the same
-entities. Meta-ontology should build that coherence in-process first. A clean
-modular monolith can later move selected interfaces across process boundaries
-without redesigning the ontology.
+entities. Meta-ontology now establishes that coherence in process: one model
+drives LiNo loading, the `meta-language` network, JSON Schema, imports,
+validation, change plans, connector normalization, CLI output, and search. A
+clean modular monolith can later move selected interfaces across process
+boundaries without redesigning the ontology.

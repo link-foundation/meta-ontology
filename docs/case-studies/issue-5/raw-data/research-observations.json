@@ -1,5 +1,5 @@
 {
-  "observed_at": "2026-07-12",
+  "observed_at": "2026-07-27",
   "meta_ontology": {
     "repository": "link-foundation/meta-ontology",
     "default_branch": "main",
@@ -8,7 +8,7 @@
     "pull_request": 6,
     "pull_request_state_at_collection": "OPEN_DRAFT",
     "issue_comments": 0,
-    "pull_request_conversation_comments": 0,
+    "pull_request_conversation_comments": 10,
     "pull_request_inline_comments": 0,
     "pull_request_reviews": 0
   },
@@ -29,8 +29,9 @@
     ]
   },
   "link_foundation_toolchain": {
-    "observed_at": "2026-07-13",
+    "observed_at": "2026-07-27",
     "meta_language_repository": "link-foundation/meta-language",
+    "meta_language_crate_version_selected": "0.54.0",
     "meta_language_summary": "Universal self-describing meta language backed by a links network; Rust crate plus parity JavaScript package; Unlicense",
     "meta_language_issue_179": {
       "url": "https://github.com/link-foundation/meta-language/issues/179",
@@ -42,11 +43,16 @@
     "maintainer_direction": {
       "source": "https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-4951163416",
       "summary": "Full implementation should use the meta-language library once meta-language#179 is ready; that prerequisite is now closed/completed."
+    },
+    "maintainer_implementation_feedback": {
+      "source": "https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-5085348085",
+      "summary": "The OpenMetadata practices must be actually implemented, not only documented."
     }
   },
   "notes": [
     "Counts and latest-release facts are time-sensitive and must be rechecked before implementation.",
     "No upstream source files are copied into this repository; primary links and derived observations are preserved instead.",
-    "2026-07-13: maintainer directed that the implementation be built on the meta-language library; its enabling issue meta-language#179 was closed as completed the same day."
+    "2026-07-13: maintainer directed that the implementation be built on the meta-language library; its enabling issue meta-language#179 was closed as completed the same day.",
+    "2026-07-27: refreshed every issue/PR feedback stream and implemented the in-process catalog, ingestion, interchange, validation, CLI, and search slices in response to the maintainer's 2026-07-26 feedback."
   ]
 }

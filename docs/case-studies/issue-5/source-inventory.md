@@ -5,7 +5,8 @@
 The investigation used the GitHub API/CLI for repository state and official
 OpenMetadata documentation and source repositories for technical claims.
 Marketing claims and time-sensitive counts are treated as observations, not as
-architecture requirements. Access date for every online source: 2026-07-12.
+architecture requirements. Initial access date: 2026-07-12; implementation
+facts and PR feedback were refreshed on 2026-07-27.
 
 ## Local issue and pull request
 
@@ -13,10 +14,10 @@ architecture requirements. Access date for every online source: 2026-07-12.
 | --- | --- |
 | [Issue 5](https://github.com/link-foundation/meta-ontology/issues/5) | Open; asks for data collection, deep online research, complete requirements, solution options, plans, and component/library evaluation in one PR |
 | [PR 6](https://github.com/link-foundation/meta-ontology/pull/6) | Draft placeholder on branch `issue-5-e2602184e2c5` at collection time |
-| Issue comments API | No comments |
-| PR review comments API | No inline comments |
-| PR conversation comments API | No comments |
-| PR reviews API | No reviews |
+| Issue comments API | No comments as of 2026-07-27 |
+| PR review comments API | No inline comments as of 2026-07-27 |
+| PR conversation comments API | Ten comments as of 2026-07-27, including the `meta-language` direction and the request for actual implementation |
+| PR reviews API | No reviews as of 2026-07-27 |
 | [Issue 1 case study](../issue-1/README.md) | Establishes this repository's requirements/research/plan precedent |
 | [Issue 3 case study](../issue-3/README.md) | Establishes the collected-evidence and explicit-root-cause precedent |
 
@@ -56,7 +57,7 @@ below can prefer it over generic crates.
 
 | Component | Observation | Relevance to the plan |
 | --- | --- | --- |
-| [`meta-language`](https://github.com/link-foundation/meta-language) | Universal, self-describing meta language backed by a links network; reference Rust crate plus a parity JavaScript package (`crates.io` / `npm`); Unlicense | Primary candidate foundation for the canonical model, typed graph, and interchange; its Rust/JS parity also serves the M3 microservice and the M4 WASM/React app |
+| [`meta-language`](https://github.com/link-foundation/meta-language) | Universal, self-describing meta language backed by a links network; Rust crate 0.54.0 selected for this implementation; parity JavaScript package; Unlicense | Implemented foundation for the normalized semantic network, full-match verification, term lookup, and versioned snapshots |
 | [`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179) | "Support all file formats … required at meta-ontology#6"; closed/completed 2026-07-13 | Unblocks format translation/transformation/storage, which is the interchange requirement (Phase 4) |
 | [`links-notation`](https://github.com/link-foundation/links-notation) | lino parser/serializer already used for every `data/*.lino` file | Remains the canonical storage syntax; the semantic model layers on top |
 | [`lino-arguments`](https://github.com/link-foundation/lino-arguments) | clap-style CLI argument parser with `.lenv` config | Already the CLI boundary; reused unchanged |
@@ -65,6 +66,13 @@ below can prefer it over generic crates.
 The repository README already states this project "follows the issue's directive
 to use the `link-foundation` toolchain," so preferring `meta-language` is
 consistent with existing direction, not a new dependency policy.
+
+The maintainer's later feedback
+([PR 6 comment, 2026-07-26](https://github.com/link-foundation/meta-ontology/pull/6#issuecomment-5085348085))
+clarified that documentation alone was insufficient. The catalog, ingestion,
+interchange, CLI, data migration, examples, and tests in this PR implement the
+in-process recommendations; only components blocked by explicit scale/service
+decision gates remain future work.
 
 ## Primary technical documentation
 
@@ -90,16 +98,16 @@ These are evaluated as interoperability options, not mandatory dependencies.
 
 | Need | Candidate | Intended use |
 | --- | --- | --- |
-| Canonical model + typed graph | [`meta-language`](https://github.com/link-foundation/meta-language) | Preferred foundation per maintainer direction; links-network model with Rust/JS parity for CLI, service, and WASM |
+| Canonical model + typed graph | [`meta-language`](https://github.com/link-foundation/meta-language) | Adopted foundation for the verified semantic network and snapshots |
 | Multi-format translation/storage | [`meta-language#179`](https://github.com/link-foundation/meta-language/issues/179) | Enables format translation/transformation/storage for interchange (Phase 4); now ready |
 | Data contract validation | [JSON Schema 2020-12](https://json-schema.org/draft/2020-12) | Portable interchange schema; keep lino canonical if desired |
 | Semantic graph exchange | [RDF 1.2](https://www.w3.org/TR/rdf12-concepts/) / [OWL 2](https://www.w3.org/TR/owl2-overview/) | Import/export and ontology-tool interoperability |
 | Graph constraints | [SHACL](https://www.w3.org/TR/shacl12-core/) | Express portable graph validity rules |
 | Provenance | [PROV-O](https://www.w3.org/TR/prov-o/) | Map source, agent, derivation, and activity metadata |
 | Lineage events | [OpenLineage](https://openlineage.io/docs/spec/) | Future pipeline lineage interchange, not core concept storage |
-| Rust serialization | [`serde`](https://docs.rs/serde/latest/serde/) | Typed interchange models |
-| Rust JSON Schema | [`schemars`](https://docs.rs/schemars/latest/schemars/) | Generate JSON Schema from Rust types |
-| Schema validation | [`jsonschema`](https://docs.rs/jsonschema/latest/jsonschema/) | Validate imported/exported JSON |
+| Rust serialization | [`serde`](https://docs.rs/serde/latest/serde/) | Adopted for typed interchange models |
+| Rust JSON Schema | [`schemars`](https://docs.rs/schemars/latest/schemars/) | Adopted to generate JSON Schema from Rust types |
+| Schema validation | [`jsonschema`](https://docs.rs/jsonschema/latest/jsonschema/) | Adopted to validate imported JSON |
 | Stable identifiers | [`uuid`](https://docs.rs/uuid/latest/uuid/) | UUID identity when content-derived IDs are unsuitable |
 | HTTP service | [`axum`](https://docs.rs/axum/latest/axum/) | Existing roadmap choice for M3 |
 | API description | [`utoipa`](https://docs.rs/utoipa/latest/utoipa/) | Generate OpenAPI from Rust endpoint types |
