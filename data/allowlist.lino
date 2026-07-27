@@ -279,3 +279,5 @@
 (allowlist serialization (reason programming term))
 (allowlist runtime (reason programming term))
 (allowlist standalone (reason english adjective))
+(allowlist openmetadata (reason proper noun metadata platform))
+(allowlist ids (reason acronym identity values plural))

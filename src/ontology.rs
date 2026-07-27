@@ -2,12 +2,20 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use meta_language::LinkNetwork;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
+
+use crate::catalog::{ConceptId, Governance, Provenance, Relationship, CURRENT_SCHEMA_VERSION};
+
 /// A single concept in the meta-ontology.
 ///
 /// Cycles between concepts are allowed and expected — `thing`, `concept`,
 /// and `link` all reference each other in seed data.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Concept {
+    /// Stable opaque identity. Names and labels may change without changing it.
+    pub id: ConceptId,
     /// Canonical lowercase identifier, e.g. `thing`.
     pub name: String,
     /// Human‑readable label (English by default), e.g. `Thing`.
@@ -18,25 +26,33 @@ pub struct Concept {
     pub category: String,
     /// Allolexes (alternate surface forms in NSM theory).
     pub allolexes: Vec<String>,
+    /// Explicit lookup aliases. Unlike NSM allolexes, these must be globally
+    /// unambiguous.
+    pub aliases: Vec<String>,
     /// All definitions, in insertion order.
     pub definitions: Vec<Definition>,
     /// Cross‑ontology equivalences.
     pub mappings: Vec<Mapping>,
     /// Per‑language exponents loaded from `data/primes/exponents/<lang>.lino`.
     pub exponents: BTreeMap<String, String>,
+    /// Evidence describing where this entity came from.
+    pub provenance: Provenance,
+    /// Ownership, lifecycle, classification, and tags.
+    pub governance: Governance,
 }
 
 /// One natural‑language definition of a concept.
 ///
 /// A definition is a flat list of words (concept names) — the loader
 /// preserves them in document order.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Definition {
+    /// Ordered concept words used by the definition.
     pub words: Vec<String>,
 }
 
 /// A cross‑ontology mapping — `thing ~ schema_Thing` and friends.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Mapping {
     /// External name like `schema_Thing`, `wikidata_Q35120`.
     pub external: String,
@@ -47,18 +63,53 @@ pub struct Mapping {
 /// In‑memory representation of the meta‑ontology.
 ///
 /// Built by [`crate::loader`] from `.lino` files.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct Ontology {
+    /// Version of the public catalog/interchange contract.
+    pub(crate) schema_version: u32,
     /// All concepts, keyed by canonical name. `BTreeMap` keeps `names()`
     /// alphabetical without an extra sort.
     pub(crate) concepts: BTreeMap<String, Concept>,
+    /// Explicit, typed edges between stable concept identities.
+    pub(crate) relationships: Vec<Relationship>,
     /// Words that never need a concept — proper nouns, identifiers, etc.
     pub(crate) allowlist: BTreeSet<String>,
     /// Languages declared in any exponent file.
     pub(crate) languages: BTreeSet<String>,
+    /// Normalized links-network representation supplied by `meta-language`.
+    pub(crate) network: LinkNetwork,
+}
+
+impl Default for Ontology {
+    fn default() -> Self {
+        Self {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            concepts: BTreeMap::new(),
+            relationships: Vec::new(),
+            allowlist: BTreeSet::new(),
+            languages: BTreeSet::new(),
+            network: LinkNetwork::new(),
+        }
+    }
 }
 
 impl Ontology {
+    pub(crate) fn concept_mut_or_insert(
+        &mut self,
+        name: &str,
+        source_uri: &str,
+        source_line: usize,
+    ) -> &mut Concept {
+        self.concepts
+            .entry(name.to_string())
+            .or_insert_with(|| Concept {
+                id: ConceptId::from_name(name),
+                name: name.to_string(),
+                provenance: Provenance::for_source(source_uri, source_line),
+                ..Concept::default()
+            })
+    }
+
     /// Iterate every concept name, alphabetically.
     pub fn names(&self) -> impl Iterator<Item = &str> {
         self.concepts.keys().map(String::as_str)
@@ -138,6 +189,26 @@ mod tests {
         assert!(o.find("thing").is_some(), "thing must be in seed data");
         assert!(o.find("concept").is_some(), "concept must be in seed data");
         assert!(o.find("link").is_some(), "link must be in seed data");
+        assert!(
+            o.find("language").is_some(),
+            "the language concept must not be treated as a language declaration"
+        );
+        assert!(
+            o.find("relation").is_some(),
+            "the relation concept must not be treated as an edge declaration"
+        );
+        assert!(
+            o.find("exponent").is_some(),
+            "the exponent concept must not be treated as an exponent declaration"
+        );
+        assert!(
+            o.find("dataset").is_some(),
+            "the dataset concept must not be treated as schema metadata"
+        );
+        assert!(
+            o.find("governance").is_some(),
+            "the governance concept must not be treated as governance metadata"
+        );
     }
 
     #[test]

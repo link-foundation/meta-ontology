@@ -16,6 +16,13 @@ and the milestones in [`ROADMAP.md`](ROADMAP.md). What is shipped today:
 - English exponents complete; Spanish and Russian seeded.
 - Cross-ontology mappings to Schema.org, OWL/RDF, SUMO, Wikidata.
 - Word-coverage check that reports words missing from the ontology.
+- A versioned catalog contract with stable IDs, typed relationships,
+  provenance, governance metadata, and stable validation diagnostics.
+- A verified `meta-language` links network and immutable snapshots.
+- Generated JSON Schema, validated JSON round trips, deterministic import
+  plans, and ranked in-memory search.
+- A fixture-backed ingestion contract with redacted secrets, checkpoints,
+  partial-failure quarantine, dry runs, and idempotent replay.
 
 The HTTP microservice and the WASM/React web app are scaffolded only;
 their full implementation is staged in `ROADMAP.md` (M3 and M4).
@@ -52,6 +59,22 @@ cargo run -- check-words README.md
 
 # Show declared languages
 cargo run -- langs
+
+# Validate all catalog layers
+cargo run -- validate
+
+# Export the catalog contract or its generated JSON Schema
+cargo run -- export-json
+cargo run -- json-schema
+
+# Preview a full-replacement import without applying it
+cargo run -- plan-import candidate.json --format ndjson
+
+# Search stable IDs, names, labels, aliases, and definitions
+cargo run -- search "body or not a body"
+
+# Run the fixture-backed ingestion example
+cargo run --example openmetadata_fixture_ingestion
 ```
 
 ## Crates we depend on
@@ -65,6 +88,9 @@ toolchain:
 - [`lino-arguments`](https://github.com/link-foundation/lino-arguments)
   — clap-style argument parser with `.lenv` config support, used by the
   CLI binary.
+- [`meta-language`](https://github.com/link-foundation/meta-language)
+  — canonical links-network model, full-match verification, and immutable
+  snapshots shared with other Link Foundation consumers.
 - [`lino-objects-codec`](https://github.com/link-foundation/lino-objects-codec)
   — feature-gated dependency for runtime object encoding (used by the
   microservice in M3 and the web app in M4).
@@ -79,6 +105,8 @@ toolchain:
 │   └── allowlist.lino     # words that intentionally have no concept
 ├── src/
 │   ├── lib.rs             # library entry point
+│   ├── catalog.rs         # identity, validation, interchange, plans, search
+│   ├── ingestion.rs       # connector, checkpoint, normalization contracts
 │   ├── ontology.rs        # Ontology, Concept, Definition, Mapping types
 │   ├── loader.rs          # walks data/, parses lino, builds the graph
 │   ├── words.rs           # tokenizer + scanner used by check-words
@@ -86,7 +114,7 @@ toolchain:
 ├── docs/
 │   ├── case-studies/      # deep research per issue
 │   └── plan/              # per-slice implementation plan
-├── examples/basic_usage.rs
+├── examples/              # library and fixture-ingestion examples
 ├── tests/
 │   ├── unit/              # unit tests
 │   └── integration/       # CLI integration tests
@@ -101,6 +129,8 @@ toolchain:
 - [`ROADMAP.md`](ROADMAP.md) — staged milestones
 - [`docs/plan/`](docs/plan/) — per-slice implementation plan
 - [`docs/case-studies/issue-1/`](docs/case-studies/issue-1/) — deep analysis
+- [`docs/case-studies/issue-5/`](docs/case-studies/issue-5/) — OpenMetadata
+  practice analysis and delivered implementation map
 
 ## License
 
