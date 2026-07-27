@@ -1,4 +1,6 @@
+mod ingestion;
 mod ontology;
+mod openmetadata;
 mod words;
 
 #[path = "ci-cd/mod.rs"]

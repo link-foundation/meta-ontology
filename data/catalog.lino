@@ -1,0 +1,85 @@
+(dataset
+  (schema_version 1))
+(catalog
+  (label Catalog)
+  (origin openmetadata)
+  (definition catalog is a set of metadata concepts and relationships))
+(checkpoint
+  (label Checkpoint)
+  (origin openmetadata)
+  (definition checkpoint is a reference to a source record))
+(contract
+  (label Contract)
+  (origin openmetadata)
+  (definition contract is a definition of a model))
+(dataset
+  (label Dataset)
+  (origin openmetadata)
+  (definition dataset is a set of related data))
+(diagnostic
+  (label Diagnostic)
+  (origin openmetadata)
+  (definition diagnostic is a record of a validation problem))
+(fixture
+  (label Fixture)
+  (origin openmetadata)
+  (definition fixture is source data used to test ingestion))
+(governance
+  (label Governance)
+  (origin openmetadata)
+  (definition governance is ownership classification and lifecycle metadata))
+(identity
+  (label Identity)
+  (origin openmetadata)
+  (definition identity is a stable reference to a concept))
+(import
+  (label Import)
+  (origin openmetadata)
+  (definition import is a change from source data to the ontology))
+(ingestion
+  (label Ingestion)
+  (origin openmetadata)
+  (definition ingestion is normalization and validation of source data))
+(metadata
+  (label Metadata)
+  (origin openmetadata)
+  (definition metadata is data that describes other data))
+(model
+  (label Model)
+  (origin openmetadata)
+  (definition model is a set of concepts and relationships))
+(provenance
+  (label Provenance)
+  (origin openmetadata)
+  (definition provenance is metadata about the source of a concept or relationship))
+(relationship
+  (label Relationship)
+  (origin openmetadata)
+  (definition relationship is a typed relation between concept identities))
+(search
+  (label Search)
+  (origin openmetadata)
+  (definition search is finding concepts that match words))
+(snapshot
+  (label Snapshot)
+  (origin openmetadata)
+  (definition snapshot is an immutable version of a network))
+(validation
+  (label Validation)
+  (origin openmetadata)
+  (definition validation is checking a catalog contract))
+(verification
+  (label Verification)
+  (origin openmetadata)
+  (definition verification is checking a network representation))
+(governance thing
+  (owner link_foundation)
+  (classification public)
+  (tag foundational))
+(governance concept
+  (owner link_foundation)
+  (classification public)
+  (tag foundational))
+(relation thing defines concept)
+(relation concept defines thing)
+(relation link related concept)
