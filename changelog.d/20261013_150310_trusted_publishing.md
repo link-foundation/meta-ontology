@@ -3,4 +3,4 @@ bump: patch
 ---
 
 ### Changed
-- Publish through GitHub Actions trusted publishing and remove long-lived registry token workflow inputs.
+- Prefer GitHub Actions trusted publishing for automatic and manual crates.io releases, retaining registry token secrets as a fallback scoped to the publish steps.
