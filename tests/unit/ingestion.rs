@@ -61,7 +61,10 @@ fn fixture_connector_quarantines_bad_records_and_resumes_from_checkpoint() {
         .expect("apply valid records from first batch");
     let second =
         run_connector(&after_first, &mut connector, Some(&first.checkpoint)).expect("resume");
-    assert!(second.errors.is_empty());
+    assert_eq!(
+        second.errors,
+        [] as [meta_ontology::ingestion::IngestionError; 0]
+    );
     assert_eq!(second.checkpoint.next_offset, 3);
     let after_second = after_first
         .apply_import(second.document)

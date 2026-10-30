@@ -29,7 +29,7 @@ fn seed_data_has_stable_identity_typed_relations_and_provenance() {
 
     assert_eq!(thing.id.as_str(), "meta-ontology:thing");
     assert_eq!(thing.provenance.license, "Unlicense");
-    assert!(!thing.provenance.fingerprint.is_empty());
+    assert_ne!(thing.provenance.fingerprint, "");
     assert!(thing
         .governance
         .owners
