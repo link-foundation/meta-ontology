@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 #[path = "../../../scripts/release-lockfile.rs"]
-mod release_lockfile;
+mod release_helper;
 
 fn run(root: &Path, program: &str, args: &[&str]) -> String {
     let output = Command::new(program)
@@ -59,7 +59,7 @@ fn release_commits_updated_lockfile_for_each_supported_layout() {
 
         // This is the production release helper: a version bump must refresh
         // AND stage the workspace lockfile before the release commit is made.
-        release_lockfile::refresh_and_stage(&cargo_root.join("Cargo.toml")).unwrap();
+        release_helper::refresh_and_stage(&cargo_root.join("Cargo.toml")).unwrap();
         let lock_path = format!("{layout}/Cargo.lock");
         run(root, "git", &["diff", "--exit-code", "--", &lock_path]);
         let staged = run(root, "git", &["diff", "--cached"]);
@@ -79,6 +79,6 @@ fn release_commits_updated_lockfile_for_each_supported_layout() {
 fn invalid_manifest_stops_release_preparation() {
     let repo = tempfile::tempdir().unwrap();
     fs::write(repo.path().join("Cargo.toml"), "invalid manifest").unwrap();
-    let error = release_lockfile::refresh_and_stage(&repo.path().join("Cargo.toml")).unwrap_err();
+    let error = release_helper::refresh_and_stage(&repo.path().join("Cargo.toml")).unwrap_err();
     assert!(error.contains("cargo failed"));
 }
