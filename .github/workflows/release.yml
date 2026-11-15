@@ -158,6 +158,20 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
 
+      - name: Check release version helper
+        id: release-version-check
+        run: rust-script scripts/get-version.rs
+
+      - name: Verify release version output
+        env:
+          RELEASE_VERSION: ${{ steps.release-version-check.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os, tomllib
+          with open('Cargo.toml', 'rb') as manifest:
+              assert os.environ['RELEASE_VERSION'] == tomllib.load(manifest)['package']['version']
+          PY
+
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features
 
