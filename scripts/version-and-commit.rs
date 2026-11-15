@@ -35,6 +35,9 @@ use serde::Deserialize;
 #[path = "rust-paths.rs"]
 mod rust_paths;
 
+#[path = "release-lockfile.rs"]
+mod release_lockfile;
+
 fn get_arg(name: &str) -> Option<String> {
     let args: Vec<String> = env::args().collect();
     let flag = format!("--{}", name);
@@ -437,6 +440,13 @@ fn main() {
 
     // Update version in Cargo.toml
     if let Err(e) = update_cargo_toml(package_manifest.to_string_lossy().as_ref(), &new_version) {
+        eprintln!("Error: {}", e);
+        exit(1);
+    }
+
+    // Refresh and stage the lockfile before committing or tagging the release.
+    // A later build/publish would otherwise update it and dirty the worktree.
+    if let Err(e) = release_lockfile::refresh_and_stage(&cargo_toml) {
         eprintln!("Error: {}", e);
         exit(1);
     }
