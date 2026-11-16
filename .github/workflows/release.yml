@@ -184,6 +184,9 @@ jobs:
       - name: Test trusted publisher registration without network access
         run: python3 experiments/test-register-trusted-publisher.py
 
+      - name: Test bootstrap publishing without network access
+        run: python3 experiments/test-bootstrap-publish.py
+
   # === ONTOLOGY COVERAGE CHECK ===
   # Verify that every human-language word in the curated paths is either
   # defined as a concept in the meta-ontology or listed in
@@ -515,7 +518,7 @@ jobs:
             exit 1
           fi
           VERSION=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
-          STATUS=$(curl --silent --show-error --output /tmp/crate-version.json --write-out '%{http_code}' "https://crates.io/api/v1/crates/meta-ontology/$VERSION")
+          STATUS=$(curl --silent --show-error --user-agent 'meta-ontology-release-bootstrap (https://github.com/link-foundation/meta-ontology)' --output /tmp/crate-version.json --write-out '%{http_code}' "https://crates.io/api/v1/crates/meta-ontology/$VERSION")
           case "$STATUS" in
             200) echo "Version $VERSION is already published; continuing with publisher registration." ;;
             404) cargo publish --locked ;;

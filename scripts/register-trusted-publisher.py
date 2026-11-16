@@ -20,7 +20,10 @@ PUBLISHER = {
 def register(token):
     if not token:
         raise ValueError("Publisher registration requires a crate owner API token with trusted-publishing scope.")
-    headers = {"Authorization": token, "User-Agent": "meta-ontology-release-bootstrap"}
+    headers = {
+        "Authorization": token,
+        "User-Agent": "meta-ontology-release-bootstrap (https://github.com/link-foundation/meta-ontology)",
+    }
     # Follow pagination so a retry never adds an already registered publisher.
     url = ENDPOINT + "?crate=meta-ontology"
     while url:
