@@ -16,6 +16,7 @@ on:
         options:
           - instant
           - changelog-pr
+          - bootstrap
       bump_type:
         description: 'Version bump type'
         required: true
@@ -157,6 +158,20 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
 
+      - name: Check release version helper
+        id: release-version-check
+        run: rust-script scripts/get-version.rs
+
+      - name: Verify release version output
+        env:
+          RELEASE_VERSION: ${{ steps.release-version-check.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import os, tomllib
+          with open('Cargo.toml', 'rb') as manifest:
+              assert os.environ['RELEASE_VERSION'] == tomllib.load(manifest)['package']['version']
+          PY
+
       - name: Run Clippy
         run: cargo clippy --all-targets --all-features
 
@@ -165,6 +180,12 @@ jobs:
 
       - name: Test publishing authentication and failures without uploading
         run: python3 experiments/test-publish-auth.py
+
+      - name: Test trusted publisher registration without network access
+        run: python3 experiments/test-register-trusted-publisher.py
+
+      - name: Test bootstrap publishing without network access
+        run: python3 experiments/test-bootstrap-publish.py
 
   # === ONTOLOGY COVERAGE CHECK ===
   # Verify that every human-language word in the curated paths is either
@@ -315,6 +336,11 @@ jobs:
       - name: Check package
         run: cargo package --list --allow-dirty
 
+      - name: Verify publishing from a clean checkout
+        run: |
+          cargo publish --dry-run --locked
+          test -z "$(git status --porcelain)"
+
   # === AUTO RELEASE ===
   # Automatic release on push to main using changelog fragments
   # This job automatically bumps version based on fragments in changelog.d/
@@ -464,6 +490,46 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: rust-script scripts/create-github-release.rs --release-version "${{ steps.version.outputs.new_version }}" --repository "${{ github.repository }}"
+
+  # Bootstrap the first publication without another version bump or git push.
+  bootstrap-release:
+    name: Bootstrap crates.io
+    needs: [lint, test, build]
+    if: |
+      always() && !cancelled() &&
+      github.event_name == 'workflow_dispatch' &&
+      github.event.inputs.release_mode == 'bootstrap' &&
+      needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish the committed version
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
+        run: |
+          if [ -z "$CARGO_REGISTRY_TOKEN" ]; then
+            echo '::error::Initial publication requires a crates.io API token with publish-new scope in CARGO_REGISTRY_TOKEN or CARGO_TOKEN.'
+            exit 1
+          fi
+          VERSION=$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["package"]["version"])')
+          STATUS=$(curl --silent --show-error --user-agent 'meta-ontology-release-bootstrap (https://github.com/link-foundation/meta-ontology)' --output /tmp/crate-version.json --write-out '%{http_code}' "https://crates.io/api/v1/crates/meta-ontology/$VERSION")
+          case "$STATUS" in
+            200) echo "Version $VERSION is already published; continuing with publisher registration." ;;
+            404) cargo publish --locked ;;
+            *) echo "::error::Cannot verify registry state: HTTP $STATUS"; exit 1 ;;
+          esac
+          test -z "$(git status --porcelain)"
+
+      - name: Attach the release workflow trusted publisher
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || secrets.CARGO_TOKEN }}
+        run: python3 scripts/register-trusted-publisher.py
 
   # === MANUAL CHANGELOG PR ===
   changelog-pr:

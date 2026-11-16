@@ -26,6 +26,15 @@ all build and test steps. The action revokes its temporary token after the job.
   checks, using the selected bump type. Select `main` for production releases.
 - Manual dispatch with `release_mode=changelog-pr` creates a changelog PR rather
   than publishing a package.
+- Manual dispatch with `release_mode=bootstrap` publishes the committed version
+  without bumping, tagging, or pushing a release commit, then attaches the
+  `release.yml` trusted publisher through the crates.io API. It requires a crate
+  owner token with initial publishing and trusted-publishing permissions in
+  `CARGO_REGISTRY_TOKEN` or `CARGO_TOKEN`. An already published version is skipped
+  so registration can be retried. Run it on the reviewed commit with:
+  `gh workflow run release.yml --ref issue-8-7c6c697378a0 -f release_mode=bootstrap -f bump_type=patch`.
+  The required bump input is unused by bootstrap mode. The same lint, test, and
+  build gates apply. API errors fail the job with an explicit diagnostic.
 - Documentation deployment depends on a successful package build and remains
   independent of registry publication.
 
@@ -56,12 +65,19 @@ metadata. Record the run URL and published version in PR #7. A green job using
 fallback, a dry run, or an already-published version is not proof of an OIDC
 release. Never print tokens to establish which credential was used.
 
-As of the 2026-10-30 investigation, the public API returned HTTP 404 with
-`crate meta-ontology does not exist`. The issue-solver environment had neither
-registry credentials nor GitHub Actions OIDC credentials, and no migration tool
-was installed. Initial publication, authenticated publisher registration, and
-verification of a real OIDC release therefore remain blocked. Preserve the
-fallback secrets and leave PR #7 unmerged until these requirements are resolved.
+The [2026-11-16 bootstrap run](https://github.com/link-foundation/meta-ontology/actions/runs/43779058309)
+published `meta-ontology` 0.10.0 using the organization's `CARGO_TOKEN` secret.
+The public registry API confirms that version is available. Publisher registration
+then returned HTTP 403, so the trusted publisher is not yet verified. The local
+environment has no registry or OIDC credentials and no migration tool. Preserve
+the fallback secrets. A crate owner can attach the configuration in crates.io
+settings or provide an owner API token with `trusted-publishing` scope, then retry
+bootstrap mode; it skips the existing version and retries registration.
+
+Automated version bumps now refresh and stage the workspace lockfile before
+creating the release commit and tag. The package build also runs
+`cargo publish --dry-run --locked` and requires a clean worktree, catching a
+stale lockfile before the publishing job.
 
 ## Local validation
 
@@ -71,3 +87,8 @@ precedence, legacy and empty-token fallbacks, missing authentication, duplicate
 versions, and registry failures without uploading a crate. CI runs this check
 in the lint job. These mocked tests verify the helper's behavior; they do not
 verify the crates.io trust configuration or perform the OIDC exchange.
+Run `python3 experiments/test-register-trusted-publisher.py` for mocked publisher
+registration, pagination, retry, permission failure, response checks, and safe
+authorization diagnostics. `python3 experiments/test-bootstrap-publish.py` checks
+the actual bootstrap shell with local stubs, including the project User-Agent
+required for registry requests.
