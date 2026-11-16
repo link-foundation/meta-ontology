@@ -17,6 +17,26 @@ PUBLISHER = {
 }
 
 
+def registry_error_detail(error):
+    # Only report recognized registry messages; never echo arbitrary response
+    # bodies, which might contain credentials or proxy diagnostics.
+    known = {
+        "this token does not have the required permissions to perform this action",
+        "this action requires authentication",
+        "You are not an owner of this crate",
+        "You must verify your email address to create a Trusted Publishing config",
+    }
+    try:
+        with error:
+            data = json.loads(error.read(8192))
+        for item in data.get("errors", []):
+            if isinstance(item, dict) and item.get("detail") in known:
+                return item["detail"]
+    except (ValueError, OSError, AttributeError, TypeError):
+        pass
+    return "No recognized authorization detail returned by the registry"
+
+
 def register(token):
     if not token:
         raise ValueError("Publisher registration requires a crate owner API token with trusted-publishing scope.")
@@ -51,6 +71,7 @@ if __name__ == "__main__":
     except HTTPError as error:
         # Never include authentication headers or request data in diagnostics.
         print(f"::error::Publisher registration failed: HTTP {error.code}. "
+              f"{registry_error_detail(error)}. "
               "The token must belong to a verified crate owner and allow trusted publishing. "
               "A crate owner can also attach release.yml in the crates.io crate settings.", file=sys.stderr)
         sys.exit(1)

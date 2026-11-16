@@ -65,13 +65,14 @@ metadata. Record the run URL and published version in PR #7. A green job using
 fallback, a dry run, or an already-published version is not proof of an OIDC
 release. Never print tokens to establish which credential was used.
 
-As of the 2026-11-15 investigation, the public API returned HTTP 404 with
-`crate meta-ontology does not exist`. The issue-solver environment had neither
-local registry credentials nor GitHub Actions OIDC credentials, and no migration
-tool was installed. The organization `CARGO_TOKEN` secret is available to this
-repository's Actions jobs; bootstrap mode can attempt initial publication and
-publisher registration without exposing its value. Its validity and permissions
-must be established by a real run. Preserve the fallback secrets.
+The [2026-11-16 bootstrap run](https://github.com/link-foundation/meta-ontology/actions/runs/43779058309)
+published `meta-ontology` 0.10.0 using the organization's `CARGO_TOKEN` secret.
+The public registry API confirms that version is available. Publisher registration
+then returned HTTP 403, so the trusted publisher is not yet verified. The local
+environment has no registry or OIDC credentials and no migration tool. Preserve
+the fallback secrets. A crate owner can attach the configuration in crates.io
+settings or provide an owner API token with `trusted-publishing` scope, then retry
+bootstrap mode; it skips the existing version and retries registration.
 
 Automated version bumps now refresh and stage the workspace lockfile before
 creating the release commit and tag. The package build also runs
@@ -87,4 +88,7 @@ versions, and registry failures without uploading a crate. CI runs this check
 in the lint job. These mocked tests verify the helper's behavior; they do not
 verify the crates.io trust configuration or perform the OIDC exchange.
 Run `python3 experiments/test-register-trusted-publisher.py` for mocked publisher
-registration, pagination, retry, permission failure, and response checks.
+registration, pagination, retry, permission failure, response checks, and safe
+authorization diagnostics. `python3 experiments/test-bootstrap-publish.py` checks
+the actual bootstrap shell with local stubs, including the project User-Agent
+required for registry requests.

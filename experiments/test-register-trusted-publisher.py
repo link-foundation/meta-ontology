@@ -53,9 +53,28 @@ class RegistrationTests(unittest.TestCase):
 
     @patch.object(publisher, "urlopen")
     def test_permission_failure_is_not_success(self, request):
-        request.side_effect = HTTPError(publisher.ENDPOINT, 403, "Forbidden", {}, None)
-        with self.assertRaises(HTTPError):
+        request.side_effect = HTTPError(publisher.ENDPOINT, 403, "Forbidden", {}, io.BytesIO())
+        with self.assertRaises(HTTPError) as failure:
             publisher.register("synthetic-credential")
+        failure.exception.close()
+
+    def test_authorization_diagnostic_reports_only_known_messages(self):
+        permission = "this token does not have the required permissions to perform this action"
+        for detail in [permission, "this action requires authentication", "synthetic-credential"]:
+            with self.subTest(detail=detail):
+                error = HTTPError(publisher.ENDPOINT, 403, "Forbidden", {},
+                                  response({"errors": [{"detail": detail}]}))
+                diagnostic = publisher.registry_error_detail(error)
+                self.assertNotIn("synthetic-credential", diagnostic)
+                if detail != "synthetic-credential":
+                    self.assertEqual(diagnostic, detail)
+                self.assertTrue(error.closed)
+
+    def test_non_json_authorization_response_is_not_logged(self):
+        error = HTTPError(publisher.ENDPOINT, 403, "Forbidden", {},
+                          io.BytesIO(b"proxy error: synthetic-credential"))
+        self.assertNotIn("synthetic-credential", publisher.registry_error_detail(error))
+        self.assertTrue(error.closed)
 
     @patch.object(publisher, "urlopen")
     def test_unexpected_configuration_is_not_success(self, request):
